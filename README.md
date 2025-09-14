@@ -38,20 +38,15 @@ Las dependencias principales son:
 
 ### 3. Ejecución Local
 
-Asegúrate de estar en el directorio raíz del proyecto y de tener el entorno virtual activado.
+Simplemente ejecuta el siguiente comando y el sistema se encargará de todo:
 
 ```bash
-streamlit run main.py
+streamlit run run.py
 ```
 
-Si el archivo principal está en otra carpeta, usa la ruta correspondiente, por ejemplo:
-```bash
-streamlit run 1_precog_monitor/main.py
-```
+No necesitas preocuparte por rutas ni archivos principales, el dashboard se encargará de mostrar todos los módulos correctamente.
 
 ## Ejecución Automática Paso a Paso
-
-Sigue estos pasos exactamente para ejecutar el proyecto:
 
 1. **Abre una terminal** en la carpeta raíz del proyecto.
 
@@ -77,11 +72,7 @@ Sigue estos pasos exactamente para ejecutar el proyecto:
 
 5. **Ejecuta la aplicación**:
    ```bash
-   streamlit run main.py
-   ```
-   O, si el archivo principal está en una subcarpeta:
-   ```bash
-   streamlit run 1_precog_monitor/main.py
+   streamlit run run.py
    ```
 
 6. **Abre el navegador** en la dirección que aparece en la terminal (normalmente http://localhost:8501).

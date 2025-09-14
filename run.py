@@ -1,27 +1,39 @@
 # run.py - Lanzador central del Dashboard de Mando y Control
 
 import streamlit as st
-import importlib
-import sys
-import os
 
-# Añadir la carpeta raíz al sys.path
-sys.path.append(os.path.dirname(__file__))
-
-
-def mostrar_precog():
-    # Cambia el import para usar ruta relativa
+# Importa los módulos principales de cada sección
+try:
     from precog_monitor.main import main as precog_main
-    precog_main()
+except ImportError:
+    def precog_main():
+        st.warning("Precog Monitor no disponible.")
 
-st.set_page_config(page_title="Dashboard de Mando y Control", layout="wide")
+try:
+    from chronos_vision.main import main as chronos_main
+except ImportError:
+    def chronos_main():
+        st.warning("Chronos Vision no disponible.")
 
-st.sidebar.title("Navegación")
+try:
+    from klang_manual.main import main as klang_main
+except ImportError:
+    def klang_main():
+        st.warning("Klang Manual no disponible.")
+
+# Diccionario de secciones
 secciones = {
-    "Precog: Monitor de Riesgo Táctico": mostrar_precog,
-    "Chronos: Visión Estratégica 2040": lambda: st.info("Implementa la integración de Chronos en chronos_vision/main.py"),
-    "K-Lang: Manual de Batalla Interactivo": lambda: st.info("Implementa la integración de K-Lang en klang_manual/main.py")
+    "Precog Monitor": precog_main,
+    "Chronos Vision": chronos_main,
+    "Klang Manual": klang_main,
 }
-seccion = st.sidebar.radio("Ir a sección:", list(secciones.keys()))
 
-secciones[seccion]()
+def main():
+    st.sidebar.title("Dashboard de Mando y Control")
+    seccion = st.sidebar.selectbox("Selecciona módulo", list(secciones.keys()))
+    st.title(seccion)
+    # Ejecuta la función principal de la sección seleccionada
+    secciones[seccion]()
+
+if __name__ == "__main__":
+    main()

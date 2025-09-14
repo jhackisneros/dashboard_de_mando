@@ -1,1 +1,1 @@
-# Este archivo puede estar vacío
+from .mapa_calor_riesgo import MapaCalorRiesgo

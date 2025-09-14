@@ -1,0 +1,1 @@
+from .modulo_principal import Componente2Principal
