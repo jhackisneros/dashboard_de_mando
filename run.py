@@ -2,6 +2,12 @@
 
 import streamlit as st
 import importlib
+import sys
+import os
+
+# Añadir la carpeta raíz al sys.path
+sys.path.append(os.path.dirname(__file__))
+
 
 def mostrar_precog():
     import precog_monitor.main as precog_main

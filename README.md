@@ -22,7 +22,10 @@ Se recomienda el uso de un entorno virtual:
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+# En Windows:
+venv\Scripts\activate
+# En Mac/Linux:
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -35,13 +38,96 @@ Las dependencias principales son:
 
 ### 3. Ejecución Local
 
+Asegúrate de estar en el directorio raíz del proyecto y de tener el entorno virtual activado.
+
 ```bash
 streamlit run main.py
 ```
 
+Si el archivo principal está en otra carpeta, usa la ruta correspondiente, por ejemplo:
+```bash
+streamlit run 1_precog_monitor/main.py
+```
+
+## Ejecución Automática Paso a Paso
+
+Sigue estos pasos exactamente para ejecutar el proyecto:
+
+1. **Abre una terminal** en la carpeta raíz del proyecto.
+
+2. **Crea el entorno virtual** (solo la primera vez):
+   ```bash
+   python -m venv venv
+   ```
+
+3. **Activa el entorno virtual**:
+   - En Windows:
+     ```bash
+     venv\Scripts\activate
+     ```
+   - En Mac/Linux:
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. **Instala las dependencias**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. **Ejecuta la aplicación**:
+   ```bash
+   streamlit run main.py
+   ```
+   O, si el archivo principal está en una subcarpeta:
+   ```bash
+   streamlit run 1_precog_monitor/main.py
+   ```
+
+6. **Abre el navegador** en la dirección que aparece en la terminal (normalmente http://localhost:8501).
+
+Si sigues estos pasos y no funciona, revisa la sección "Solución de Problemas" más abajo.
+
+## Solución de Problemas
+
+Si no se ejecuta correctamente:
+
+1. **Verifica la instalación de dependencias**  
+   Ejecuta:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Comprueba que el archivo `main.py` existe**  
+   Debe estar en la raíz del proyecto o en la carpeta del módulo que quieres ejecutar.
+
+3. **Activa el entorno virtual**  
+   - En Windows:
+     ```bash
+     venv\Scripts\activate
+     ```
+   - En Mac/Linux:
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. **Instala Streamlit si falta**  
+   ```bash
+   pip install streamlit
+   ```
+
+5. **Verifica la versión de Python**  
+   Debe ser 3.8 o superior:
+   ```bash
+   python --version
+   ```
+
+6. **Revisa los mensajes de error en la terminal**  
+   Copia el mensaje y busca la solución o consulta con el equipo.
+
 ### 4. Despliegue
 
-Se recomienda desplegar en Streamlit Community Cloud, Hugging Face Spaces o Heroku. Consultar la documentación de cada plataforma para detalles.
+Se recomienda desplegar en Streamlit Community Cloud, Hugging Face Spaces o Heroku. Consulta la documentación de cada plataforma para más detalles.
 
 ## Mapas de Calor 3D y Despliegue en Hugging Face Spaces
 
@@ -65,7 +151,7 @@ st.plotly_chart(fig)
 1. Crea una cuenta en [Hugging Face](https://huggingface.co/).
 2. Sube tu repositorio y selecciona "Space" tipo Streamlit.
 3. Añade un archivo `requirements.txt` con las dependencias.
-4. El archivo principal debe ser `run.py`.
+4. El archivo principal debe ser `main.py` (no `run.py`).
 
 Más información: https://huggingface.co/docs/hub/spaces
 

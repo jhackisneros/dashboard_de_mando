@@ -1,8 +1,8 @@
 # main.py - Precog: Monitor de Riesgo Táctico
 
 import streamlit as st
-from 1_precog_monitor.componente1 import MapaCalorRiesgo
-from 1_precog_monitor.componente2 import SimuladorRiesgo
+from precog_monitor.componente1 import MapaCalorRiesgo
+from precog_monitor.componente2 import SimuladorRiesgo
 
 st.title("Precog: Monitor de Riesgo Táctico")
 
