@@ -1,5 +1,5 @@
 import streamlit as st
-from precog_monitor.componente1 import MapaCalorRiesgo
+from .componente1 import MapaCalorRiesgo
 from precog_monitor.componente2 import SimuladorRiesgo
 
 st.title("Precog: Monitor de Riesgo Táctico")

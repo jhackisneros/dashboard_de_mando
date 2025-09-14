@@ -10,7 +10,9 @@ sys.path.append(os.path.dirname(__file__))
 
 
 def mostrar_precog():
-    import precog_monitor.main as precog_main
+    # Cambia el import para usar ruta relativa
+    from precog_monitor.main import main as precog_main
+    precog_main()
 
 st.set_page_config(page_title="Dashboard de Mando y Control", layout="wide")
 
