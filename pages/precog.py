@@ -17,7 +17,7 @@ class PrecogPage:
         velocidad = st.slider("Velocidad media (km/h)", 0, 200, 50)
         lluvia = st.slider("Intensidad de lluvia (mm/h)", 0, 100, 20)
 
-        # --- Variables avanzadas dentro de expander ---
+        # --- Variables avanzadas ---
         with st.expander("Variables Avanzadas"):
             temperatura = st.slider("Temperatura (°C)", -20, 50, 25)
             nivel_rio = st.slider("Nivel del río (cm)", 0, 500, 100)
@@ -36,7 +36,6 @@ class PrecogPage:
             velocidad, lluvia, temperatura, nivel_rio, humedad
         )
 
-        # Guardar riesgo promedio en el histórico
         promedio_riesgo = int(np.mean(z))
         st.session_state.hist_riesgo.append(promedio_riesgo)
 
@@ -69,6 +68,7 @@ class PrecogPage:
 
         with col2:
             st.subheader("Monitor de Riesgo / Alertas")
+
             # Contar niveles
             rojos = np.sum(z > 70)
             amarillos = np.sum((z > 40) & (z <= 70))
@@ -82,7 +82,7 @@ class PrecogPage:
             else:
                 st.success(f"✅ Riesgo bajo: {verdes} puntos verdes")
 
-            # Información clave
+            # Métricas
             st.metric("Velocidad media (km/h)", velocidad)
             st.metric("Intensidad de lluvia (mm/h)", lluvia)
             st.metric("Temperatura (°C)", temperatura)
@@ -90,7 +90,7 @@ class PrecogPage:
             st.metric("Humedad (%)", humedad)
             st.metric("Nivel de Riesgo Promedio (%)", f"{promedio_riesgo}%")
 
-            # Descarga de datos
+            # Descargar datos
             df_riesgo = pd.DataFrame(z, columns=[f"Col{i}" for i in range(z.shape[1])])
             st.download_button(
                 "Descargar datos de riesgo",

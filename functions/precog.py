@@ -2,16 +2,22 @@ import numpy as np
 
 class PreCogLogic:
     def __init__(self):
-        pass  # Aquí se pueden cargar modelos reales
+        pass  # Aquí se podrían cargar modelos reales
 
-    def generate_risk_map(self, velocidad, lluvia):
-        # Crear una cuadrícula 10x10 para el ejemplo
+    def generate_risk_map(self, velocidad, lluvia, temperatura, nivel_rio, humedad):
+        """
+        Genera una matriz de riesgo 10x10 basada en múltiples variables.
+        Devuelve x, y, z y color para el gráfico 3D y heatmap.
+        """
         x, y = np.meshgrid(range(10), range(10))
 
-        # Ejemplo de cálculo de riesgo: función simple de velocidad y lluvia
-        z = np.random.rand(10, 10) * 50 + (velocidad + lluvia) / 5
-        z = np.clip(z, 0, 100)  # limitar entre 0-100%
+        # Cálculo de riesgo ponderado
+        riesgo_base = (velocidad * 0.4 + lluvia * 0.3 + temperatura * 0.1 +
+                       nivel_rio * 0.1 + humedad * 0.1)
 
-        # Color = nivel de riesgo
-        color = z  # Plotly usa este valor para el colorscale
+        # Generar valores aleatorios alrededor del riesgo base
+        z = np.random.rand(10, 10) * 20 + riesgo_base / 2
+        z = np.clip(z, 0, 100)
+
+        color = z
         return x, y, z, color
