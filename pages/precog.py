@@ -11,20 +11,18 @@ class PrecogPage:
             st.session_state.hist_riesgo = []
 
     def show(self):
-        st.header("Precog: Monitor de Riesgo Táctico 3D")
+        st.header("Precog: Monitor de Riesgo Táctico Profesional")
 
-        # --- Sliders principales ---
+        # --- Sliders de sensores ---
         velocidad = st.slider("Velocidad media (km/h)", 0, 200, 50)
         lluvia = st.slider("Intensidad de lluvia (mm/h)", 0, 100, 20)
-
-        # --- Variables avanzadas ---
         with st.expander("Variables Avanzadas"):
             temperatura = st.slider("Temperatura (°C)", -20, 50, 25)
             nivel_rio = st.slider("Nivel del río (cm)", 0, 500, 100)
             humedad = st.slider("Humedad (%)", 0, 100, 50)
             viento = st.slider("Velocidad del viento (km/h)", 0, 150, 30)
 
-        # --- Botones de escenarios ---
+        # --- Escenarios predefinidos ---
         col_esc, _ = st.columns([1,3])
         with col_esc:
             if st.button("Simulación Tormenta"):
@@ -32,7 +30,7 @@ class PrecogPage:
             if st.button("Escenario Crítico"):
                 velocidad, lluvia, temperatura, nivel_rio, humedad, viento = 150, 100, 10, 450, 95, 120
 
-        # --- Calcular riesgo ---
+        # --- Generar mapa de riesgo ---
         x, y, z, color = self.logic.generate_risk_map(
             velocidad, lluvia, temperatura, nivel_rio, humedad, viento
         )
@@ -40,23 +38,21 @@ class PrecogPage:
         promedio_riesgo = int(np.mean(z))
         st.session_state.hist_riesgo.append(promedio_riesgo)
 
-        # --- Columnas para diseño ---
+        # --- Layout principal ---
         col1, col2 = st.columns([3,1])
 
         with col1:
-            # Gráfico 3D
-            fig3d = go.Figure(data=[go.Scatter3d(
-                x=x.flatten(),
-                y=y.flatten(),
-                z=z.flatten(),
-                mode='markers',
-                marker=dict(
-                    size=5,
-                    color=color.flatten(),
-                    colorscale='RdYlGn_r',
-                    colorbar=dict(title="Nivel de Riesgo")
-                )
+            # Gráfico 3D tipo superficie
+            fig3d = go.Figure(data=[go.Surface(
+                x=x, y=y, z=z,
+                colorscale='RdYlGn_r',
+                colorbar=dict(title="Nivel de Riesgo")
             )])
+            fig3d.update_layout(scene=dict(
+                xaxis_title='X',
+                yaxis_title='Y',
+                zaxis_title='Riesgo (%)'
+            ))
             st.plotly_chart(fig3d, use_container_width=True)
 
             # Heatmap 2D
@@ -75,7 +71,7 @@ class PrecogPage:
             amarillos = np.sum((z > 40) & (z <= 70))
             verdes = np.sum(z <= 40)
 
-            # Alertas inteligentes
+            # Alertas
             if rojos > 10:
                 st.error(f"⚠️ ALERTA: Demasiados puntos rojos ({rojos})")
             elif amarillos > 20:
@@ -83,7 +79,7 @@ class PrecogPage:
             else:
                 st.success(f"✅ Riesgo bajo: {verdes} puntos verdes")
 
-            # Métricas
+            # KPIs
             st.metric("Velocidad media (km/h)", velocidad)
             st.metric("Intensidad de lluvia (mm/h)", lluvia)
             st.metric("Temperatura (°C)", temperatura)
@@ -101,6 +97,6 @@ class PrecogPage:
                 mime="text/csv"
             )
 
-            # Histórico del riesgo
+            # Histórico de riesgo
             if len(st.session_state.hist_riesgo) > 1:
                 st.line_chart(st.session_state.hist_riesgo, height=150)
