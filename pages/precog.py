@@ -1,80 +1,119 @@
+# pages/precog.py
 import streamlit as st
-import numpy as np
+import plotly.express as px
 import pandas as pd
-import plotly.graph_objects as go
+import numpy as np
 from functions.precog import PreCogLogic
 
 class PrecogPage:
     def __init__(self):
-        self.logic = PreCogLogic()
-        self.distritos = [
-            "Centro", "Arganzuela", "Retiro", "Salamanca", "Chamartín", 
-            "Tetuán", "Chamberí", "Usera", "Moncloa-Aravaca", "Latina",
-            "Carabanchel", "Fuencarral-El Pardo", "Hortaleza", "Villaverde",
-            "Villa de Vallecas", "Vicálvaro", "San Blas-Canillejas", "Ciudad Lineal",
-            "Moratalaz", "Puente de Vallecas", "Barajas"
-        ]
+        # Cargar shapefile de Madrid
+        self.logic = PreCogLogic(shapefile_path="data/Distritos.shp")
 
     def show(self):
-        st.header("Precog: Monitor de Riesgo Táctico 3D")
+        st.header("Precog: Monitor de Riesgo Táctico 3D - Madrid")
 
-        # Sliders interactivos
+        # Sliders para todos los factores
         velocidad = st.slider("Velocidad media (km/h)", 0, 200, 50)
         lluvia = st.slider("Intensidad de lluvia (mm/h)", 0, 100, 20)
         viento = st.slider("Velocidad del viento (km/h)", 0, 150, 30)
         temperatura = st.slider("Temperatura (°C)", -10, 40, 20)
         humedad = st.slider("Humedad (%)", 0, 100, 50)
 
-        # Crear dataframe de riesgo por distrito
-        riesgos = []
-        for distrito in self.distritos:
-            base_riesgo = np.random.rand() * 10
-            riesgo = np.clip((velocidad + lluvia + viento + temperatura + humedad)/5 + base_riesgo, 0, 100)
-            riesgos.append({"Distrito": distrito, "Nivel de Riesgo (%)": round(riesgo, 1)})
+        # Generar mapa de riesgo por distrito
+        gdf = self.logic.generate_risk_map(velocidad, lluvia, viento, temperatura, humedad)
 
-        df_riesgos = pd.DataFrame(riesgos)
+        # Layout con mapa y alertas
+        col1, col2 = st.columns([3,1])
 
-        # Alertas rápidas
-        rojos = len(df_riesgos[df_riesgos["Nivel de Riesgo (%)"] >= 70])
-        amarillos = len(df_riesgos[(df_riesgos["Nivel de Riesgo (%)"] >= 40) & (df_riesgos["Nivel de Riesgo (%)"] < 70)])
-        verdes = len(df_riesgos[df_riesgos["Nivel de Riesgo (%)"] < 40])
+        with col1:
+            # Mapa de calor interactivo
+            fig = px.choropleth_mapbox(
+                gdf,
+                geojson=gdf.__geo_interface__,
+                locations=gdf.index,
+                color="nivel_riesgo",
+                color_continuous_scale="RdYlGn_r",
+                range_color=(0, 100),
+                mapbox_style="carto-positron",
+                zoom=10,
+                center={"lat": 40.4168, "lon": -3.7038},
+                opacity=0.6,
+                hover_name="NOMBRE_DISTRICTO",
+                hover_data={"nivel_riesgo": True}
+            )
 
-        # Monitor lateral tipo alerta
-        st.sidebar.header("Alertas Rápidas")
-        st.sidebar.markdown(f"🔴 Distritos críticos: {rojos}")
-        st.sidebar.markdown(f"🟡 Distritos medios: {amarillos}")
-        st.sidebar.markdown(f"🟢 Distritos seguros: {verdes}")
+            # Semáforos como marcadores
+            for _, row in gdf.iterrows():
+                color = "green"
+                if row.nivel_riesgo > 70: color = "red"
+                elif row.nivel_riesgo > 40: color = "yellow"
+                fig.add_scattermapbox(
+                    lat=[row.geometry.centroid.y],
+                    lon=[row.geometry.centroid.x],
+                    mode='markers',
+                    marker=dict(size=15, color=color),
+                    text=row["NOMBRE_DISTRICTO"]
+                )
 
-        # Generamos coordenadas para Surface 3D
-        grid_size = int(np.ceil(np.sqrt(len(self.distritos))))
-        x, y = np.meshgrid(range(grid_size), range(grid_size))
-        z = np.zeros_like(x, dtype=float)
-        color = np.zeros_like(x, dtype=float)
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+            st.plotly_chart(fig, use_container_width=True)
 
-        for i, riesgo in enumerate(df_riesgos["Nivel de Riesgo (%)"]):
-            row = i // grid_size
-            col = i % grid_size
-            z[row, col] = riesgo / 2  # Altura proporcional al riesgo
-            color[row, col] = riesgo  # Color según riesgo
+        with col2:
+            st.subheader("Alertas por distritos")
+            alerts = self.logic.get_alerts()
+            st.markdown(f"**Rojos (alto riesgo):** {alerts['rojos']}")
+            st.markdown(f"**Amarillos (medio riesgo):** {alerts['amarillos']}")
+            st.markdown(f"**Verdes (bajo riesgo):** {alerts['verdes']}")
+            st.markdown("---")
+            st.markdown("Recomendaciones:")
+            if alerts["rojos"] > 0:
+                st.warning("¡Distritos con alto riesgo! Precaución máxima.")
+            if alerts["amarillos"] > 0:
+                st.info("Distritos con riesgo medio. Mantener vigilancia.")
+            if alerts["verdes"] > 0:
+                st.success("Distritos con bajo riesgo. Operaciones normales.")
 
-        # Gráfico 3D Surface
-        fig = go.Figure(data=[go.Surface(
-            z=z,
-            x=x,
-            y=y,
-            surfacecolor=color,
-            colorscale='RdYlGn_r',
-            colorbar=dict(title="Nivel de Riesgo")
-        )])
+        st.subheader("Ranking de distritos por nivel de riesgo")
+        st.dataframe(
+            gdf[["NOMBRE_DISTRICTO","nivel_riesgo"]]
+            .sort_values(by="nivel_riesgo", ascending=False)
+            .reset_index(drop=True)
+        )
 
-        fig.update_layout(scene=dict(
-            xaxis_title='X',
-            yaxis_title='Y',
-            zaxis_title='Nivel de Riesgo'
-        ))
+        # -------------------------------
+        # Simulación de escenarios futuros
+        st.subheader("Simulación de escenarios futuros (próximos 5 días)")
+        dias = 5
+        escenarios = []
 
-        st.plotly_chart(fig, use_container_width=True)
+        for dia in range(1, dias+1):
+            # Simulación simple: fluctuaciones aleatorias de los factores
+            delta_vel = np.random.randint(-10, 10)
+            delta_lluvia = np.random.randint(-5, 5)
+            delta_viento = np.random.randint(-5, 5)
+            delta_temp = np.random.randint(-2, 2)
+            delta_hum = np.random.randint(-5, 5)
 
-        # Tabla con riesgos por distrito
-        st.subheader("Nivel de riesgo por distrito")
-        st.dataframe(df_riesgos)
+            gdf_sim = self.logic.generate_risk_map(
+                velocidad + delta_vel,
+                lluvia + delta_lluvia,
+                viento + delta_viento,
+                temperatura + delta_temp,
+                humedad + delta_hum
+            )
+            gdf_sim["dia"] = f"Día {dia}"
+            escenarios.append(gdf_sim[["NOMBRE_DISTRICTO","nivel_riesgo","dia"]])
+
+        df_escenarios = pd.concat(escenarios)
+
+        # Gráfico de líneas para ver evolución de riesgo por distrito
+        fig2 = px.line(
+            df_escenarios,
+            x="dia",
+            y="nivel_riesgo",
+            color="NOMBRE_DISTRICTO",
+            markers=True,
+            title="Evolución de riesgo en los distritos"
+        )
+        st.plotly_chart(fig2, use_container_width=True)
