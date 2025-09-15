@@ -45,29 +45,33 @@ class PrecogPage:
         st.sidebar.markdown(f"🟡 Distritos medios: {amarillos}")
         st.sidebar.markdown(f"🟢 Distritos seguros: {verdes}")
 
-        # Generamos mapa 3D con altura por riesgo
-        num_distritos = len(self.distritos)
-        x, y = np.meshgrid(range(5), range(5))  # Matriz para 21 distritos
+        # Generamos coordenadas para Surface 3D
+        grid_size = int(np.ceil(np.sqrt(len(self.distritos))))
+        x, y = np.meshgrid(range(grid_size), range(grid_size))
         z = np.zeros_like(x, dtype=float)
         color = np.zeros_like(x, dtype=float)
 
         for i, riesgo in enumerate(df_riesgos["Nivel de Riesgo (%)"]):
-            row = i // 5
-            col = i % 5
+            row = i // grid_size
+            col = i % grid_size
             z[row, col] = riesgo / 2  # Altura proporcional al riesgo
             color[row, col] = riesgo  # Color según riesgo
 
-        fig = go.Figure(data=[go.Bar3d(
-            x=x.flatten(),
-            y=y.flatten(),
-            z=np.zeros_like(z.flatten()),
-            dx=0.8,
-            dy=0.8,
-            dz=z.flatten(),
-            color=color.flatten(),
+        # Gráfico 3D Surface
+        fig = go.Figure(data=[go.Surface(
+            z=z,
+            x=x,
+            y=y,
+            surfacecolor=color,
             colorscale='RdYlGn_r',
             colorbar=dict(title="Nivel de Riesgo")
         )])
+
+        fig.update_layout(scene=dict(
+            xaxis_title='X',
+            yaxis_title='Y',
+            zaxis_title='Nivel de Riesgo'
+        ))
 
         st.plotly_chart(fig, use_container_width=True)
 
