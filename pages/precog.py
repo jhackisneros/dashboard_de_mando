@@ -22,18 +22,19 @@ class PrecogPage:
             temperatura = st.slider("Temperatura (°C)", -20, 50, 25)
             nivel_rio = st.slider("Nivel del río (cm)", 0, 500, 100)
             humedad = st.slider("Humedad (%)", 0, 100, 50)
+            viento = st.slider("Velocidad del viento (km/h)", 0, 150, 30)
 
         # --- Botones de escenarios ---
         col_esc, _ = st.columns([1,3])
         with col_esc:
             if st.button("Simulación Tormenta"):
-                velocidad, lluvia, temperatura, nivel_rio, humedad = 120, 80, 15, 400, 90
+                velocidad, lluvia, temperatura, nivel_rio, humedad, viento = 120, 80, 15, 400, 90, 100
             if st.button("Escenario Crítico"):
-                velocidad, lluvia, temperatura, nivel_rio, humedad = 150, 100, 10, 450, 95
+                velocidad, lluvia, temperatura, nivel_rio, humedad, viento = 150, 100, 10, 450, 95, 120
 
         # --- Calcular riesgo ---
         x, y, z, color = self.logic.generate_risk_map(
-            velocidad, lluvia, temperatura, nivel_rio, humedad
+            velocidad, lluvia, temperatura, nivel_rio, humedad, viento
         )
 
         promedio_riesgo = int(np.mean(z))
@@ -88,6 +89,7 @@ class PrecogPage:
             st.metric("Temperatura (°C)", temperatura)
             st.metric("Nivel del río (cm)", nivel_rio)
             st.metric("Humedad (%)", humedad)
+            st.metric("Velocidad del viento (km/h)", viento)
             st.metric("Nivel de Riesgo Promedio (%)", f"{promedio_riesgo}%")
 
             # Descargar datos
