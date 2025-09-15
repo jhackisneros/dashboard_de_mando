@@ -1,14 +1,10 @@
+# pages/chronos.py
 import streamlit as st
+import plotly.express as px
+import pandas as pd
 
 class ChronosPage:
     def __init__(self):
-        # Diccionario con imágenes de placeholder para cada estrategia
-        self.data = {
-            "Fortaleza Verde": "https://via.placeholder.com/400x300.png?text=Fortaleza+Verde",
-            "Bunker Tecnologico": "https://via.placeholder.com/400x300.png?text=Bunker+Tecnologico"
-        }
-
-        # Defensas argumentadas de cada estrategia
         self.texts = {
             "Fortaleza Verde": (
                 "Invertir en sostenibilidad y energías renovables para asegurar la "
@@ -23,14 +19,15 @@ class ChronosPage:
     def show(self):
         st.header("Chronos: Visión Estratégica 2040")
 
-        # Selector de estrategia
         estrategia = st.selectbox(
             "Selecciona la visión estratégica:",
-            list(self.data.keys())
+            list(self.texts.keys())
         )
 
-        # Mostrar la imagen correspondiente con use_container_width
-        st.image(self.data[estrategia], use_container_width=True)
+        # Mapa interactivo centrado en Madrid
+        df = pd.DataFrame({"lat": [40.4168], "lon": [-3.7038], "name": ["Madrid"]})
+        fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name="name", zoom=10, height=400)
+        fig.update_layout(mapbox_style="open-street-map")
+        st.plotly_chart(fig, use_container_width=True)
 
-        # Mostrar la defensa argumentada
         st.markdown(f"**Justificación:** {self.texts[estrategia]}")
