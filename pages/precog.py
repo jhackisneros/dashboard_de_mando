@@ -1,4 +1,3 @@
-# pages/precog.py
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
@@ -16,8 +15,8 @@ class PrecogPage:
         velocidad = st.slider("Velocidad media (km/h)", 0, 200, 50)
         lluvia = st.slider("Intensidad de lluvia (mm/h)", 0, 100, 20)
         viento = st.slider("Velocidad del viento (km/h)", 0, 150, 30)
-        temperatura = st.slider("Temperatura (°C)", -10, 45, 25)  # nuevo
-        humedad = st.slider("Humedad (%)", 0, 100, 50)           # nuevo
+        temperatura = st.slider("Temperatura (°C)", -10, 45, 25)
+        humedad = st.slider("Humedad (%)", 0, 100, 50)
 
         # ---------------- Generación de riesgo 3D ----------------
         x, y, z, color = self.logic.generate_risk_map(
@@ -65,7 +64,6 @@ class PrecogPage:
         st.markdown(f"- Verde: {verdes} ({verdes/total*100:.1f}%)")
 
         # ---------------- Mapa de Madrid con riesgo ----------------
-        df = px.data.gapminder().query("year==2007")  # placeholder dataframe
         df_map = {"lat": y.flatten() + lat_base, "lon": x.flatten() + lon_base, "risk": z.flatten()}
         fig_map = px.scatter_mapbox(
             df_map, lat="lat", lon="lon", color="risk", size="risk",
