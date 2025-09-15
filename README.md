@@ -1,5 +1,5 @@
 # Dashboard de Mando y Control - ChronoLogistics
-
+https://github.com/jhackisneros/dashboard_de_mando.git
 ## Estructura del Proyecto
 
 El proyecto está organizado en tres módulos principales, cada uno gestionado por un equipo diferente:
