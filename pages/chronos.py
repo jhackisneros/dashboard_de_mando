@@ -1,41 +1,36 @@
 import streamlit as st
-import pandas as pd
-from PIL import Image
 
 class ChronosPage:
     def __init__(self):
-        # Pre-cargamos imágenes y textos
-        self.strategies = {
-            "Fortaleza Verde": {
-                "image": "assets/fortaleza_verde.png",
-                "desc": "Enfoque sostenible: inversión en energías renovables, reducción de emisiones y resiliencia climática."
-            },
-            "Búnker Tecnológico": {
-                "image": "assets/bunker_tecnologico.png",
-                "desc": "Alta inversión tecnológica: automatización, infraestructura crítica segura y redundancia digital."
-            }
+        # Diccionario con imágenes de placeholder para cada estrategia
+        self.data = {
+            "Fortaleza Verde": "https://via.placeholder.com/400x300.png?text=Fortaleza+Verde",
+            "Bunker Tecnologico": "https://via.placeholder.com/400x300.png?text=Bunker+Tecnologico"
+        }
+
+        # Defensas argumentadas de cada estrategia
+        self.texts = {
+            "Fortaleza Verde": (
+                "Invertir en sostenibilidad y energías renovables para asegurar la "
+                "resiliencia a largo plazo de ChronoLogistics y proteger Madrid ante futuras crisis climáticas."
+            ),
+            "Bunker Tecnologico": (
+                "Fortalecer infraestructuras tecnológicas y de seguridad para garantizar "
+                "operaciones continuas, incluso ante desastres o ataques cibernéticos."
+            )
         }
 
     def show(self):
         st.header("Chronos: Visión Estratégica 2040")
 
         # Selector de estrategia
-        strategy = st.selectbox("Selecciona la estrategia:", list(self.strategies.keys()))
-        data = self.strategies[strategy]
+        estrategia = st.selectbox(
+            "Selecciona la visión estratégica:",
+            list(self.data.keys())
+        )
 
-        # Mostrar imagen y descripción
-        col1, col2 = st.columns([2,1])
-        with col1:
-            st.image(data["image"], use_column_width=True)
-        with col2:
-            st.markdown(f"**Defensa de la estrategia:**\n\n{data['desc']}")
+        # Mostrar la imagen correspondiente con use_container_width
+        st.image(self.data[estrategia], use_container_width=True)
 
-        # Ejemplo de KPIs
-        st.subheader("Indicadores de impacto")
-        kpi_data = pd.DataFrame({
-            "Indicador": ["Reducción CO2", "Resiliencia de activos", "Inversión tecnológica"],
-            "Valor": [80 if strategy=="Fortaleza Verde" else 50,
-                      70 if strategy=="Fortaleza Verde" else 90,
-                      60 if strategy=="Fortaleza Verde" else 95]
-        })
-        st.table(kpi_data)
+        # Mostrar la defensa argumentada
+        st.markdown(f"**Justificación:** {self.texts[estrategia]}")
