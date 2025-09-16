@@ -11,13 +11,26 @@ class PrecogPage:
     def show(self):
         st.header("Precog: Monitor de Riesgo Táctico en Madrid (En Vivo)")
 
-        # --- Sliders opcionales ---
+        # --- Obtener valores por defecto desde OpenWeatherMap ---
+        weather_defaults = self.logic.fetch_weather()
+
+        # --- Sliders para todos los parámetros ---
         velocidad = st.slider("Velocidad media (km/h)", 0, 200, 50)
+        lluvia = st.slider("Intensidad de lluvia (mm/h)", 0, 100, int(weather_defaults["lluvia"]))
+        viento = st.slider("Velocidad del viento (km/h)", 0, 100, int(weather_defaults["viento"]))
+        temperatura = st.slider("Temperatura (°C)", -10, 40, int(weather_defaults["temperatura"]))
+        humedad = st.slider("Humedad (%)", 0, 100, int(weather_defaults["humedad"]))
 
-        # --- Generar datos ---
-        gdf = self.logic.generate_risk_map(velocidad=velocidad)
+        # --- Generar datos de riesgo ---
+        gdf = self.logic.generate_risk_map(
+            velocidad=velocidad,
+            lluvia=lluvia,
+            viento=viento,
+            temperatura=temperatura,
+            humedad=humedad
+        )
 
-        # --- Mapa de riesgo por distrito ---
+        # --- Mapa interactivo ---
         fig_map = px.choropleth_mapbox(
             gdf,
             geojson=gdf.geometry,
@@ -38,7 +51,7 @@ class PrecogPage:
         verdes = (gdf["riesgo"] <= 40).sum()
         st.info(f"⚠️ Alertas: 🔴 {rojos}  🟡 {amarillos}  🟢 {verdes}")
 
-        # --- Pronóstico simulado 7 días ---
+        # --- Pronóstico semanal ---
         st.subheader("Pronóstico semanal por distrito")
         days = pd.date_range(start=pd.Timestamp.today(), periods=7).strftime("%a %d/%m")
         forecast_data = []
