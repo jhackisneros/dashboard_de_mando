@@ -1,0 +1,1 @@
+self.logic = PreCogLogic(geojson_path="data/distritos_madrid.geojson")

@@ -1,39 +1,29 @@
-# functions/precog.py
-import numpy as np
 import geopandas as gpd
+import numpy as np
 
 class PreCogLogic:
-    def __init__(self, shapefile_path="data/Distritos.shp"):
-        # Cargar los distritos de Madrid
-        self.gdf = gpd.read_file(shapefile_path)
-        # Inicializamos el nivel de riesgo por distrito
-        self.gdf["nivel_riesgo"] = 0
+    def __init__(self, geojson_path="data/distritos_madrid.geojson"):
+        try:
+            self.gdf = gpd.read_file(geojson_path)
+        except Exception as e:
+            raise RuntimeError(f"No se pudo cargar el archivo GeoJSON: {e}")
 
-    def generate_risk_map(self, velocidad, lluvia, viento, temperatura, humedad):
-        """
-        Genera el nivel de riesgo para cada distrito usando los factores:
-        velocidad, lluvia, viento, temperatura y humedad.
-        """
-        # Generar riesgo aleatorio base
-        riesgo_base = np.random.rand(len(self.gdf)) * 30
+    def calcular_riesgo_distritos(self, velocidad, lluvia, viento, temperatura, humedad):
+        distritos = []
+        riesgos = []
 
-        # Ajustar riesgo según factores (simple ejemplo)
-        riesgo = riesgo_base + (velocidad + lluvia + viento) / 10 + (humedad / 5) + (temperatura / 20)
-        riesgo = np.clip(riesgo, 0, 100)  # Limitar entre 0 y 100
+        for _, row in self.gdf.iterrows():
+            base_riesgo = (
+                (velocidad * 0.3) +
+                (lluvia * 0.25) +
+                (viento * 0.2) +
+                (temperatura * 0.15) +
+                (humedad * 0.1)
+            )
+            ruido = np.random.uniform(-10, 10)
+            riesgo = max(0, min(100, base_riesgo + ruido))
 
-        self.gdf["nivel_riesgo"] = riesgo
+            distritos.append(row["NOMBRE"])  # El campo se llama así en el GeoJSON
+            riesgos.append(riesgo)
 
-        # Calcular colores: rojo = alto riesgo, verde = bajo
-        self.gdf["color"] = self.gdf["nivel_riesgo"].apply(lambda x: f"rgb({int(x*2.55)}, {int((100-x)*2.55)}, 0)")
-
-        # Retornar GeoDataFrame con nivel de riesgo y color
-        return self.gdf
-
-    def get_alerts(self, umbral_rojo=70, umbral_amarillo=40):
-        """
-        Genera alertas por cantidad de distritos rojos, amarillos y verdes.
-        """
-        rojos = (self.gdf["nivel_riesgo"] >= umbral_rojo).sum()
-        amarillos = ((self.gdf["nivel_riesgo"] >= umbral_amarillo) & (self.gdf["nivel_riesgo"] < umbral_rojo)).sum()
-        verdes = (self.gdf["nivel_riesgo"] < umbral_amarillo).sum()
-        return {"rojos": int(rojos), "amarillos": int(amarillos), "verdes": int(verdes)}
+        return distritos, riesgos, self.gdf
