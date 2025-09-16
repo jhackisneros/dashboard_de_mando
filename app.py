@@ -1,7 +1,7 @@
 import streamlit as st
-from pages.precog import PrecogPage
-from pages.chronos import ChronosPage
-from pages.klang import KLangPage
+from _pages.precog import PrecogPage
+from _pages.chronos import ChronosPage
+from _pages.klang import KLangPage
 
 # Configuración de la página
 st.set_page_config(
