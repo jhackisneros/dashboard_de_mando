@@ -1,30 +1,29 @@
-# functions/precog.py
-import geopandas as gpd
 import numpy as np
+import pandas as pd
 
 class PreCogLogic:
     def __init__(self):
-        # Cargar los distritos de Madrid desde GeoJSON
-        url = "https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/madrid-districts.geojson"
-        self.gdf = gpd.read_file(url)
-        # Inicializar una columna de riesgo
-        self.gdf['riesgo'] = 0.0
+        # Definir los distritos simulados como un ejemplo
+        self.distritos = [
+            "Centro", "Arganzuela", "Retiro", "Salamanca", "Chamartín",
+            "Tetuán", "Chamberí", "Fuencarral-El Pardo", "Moncloa-Aravaca",
+            "Latina", "Carabanchel", "Usera", "Puente de Vallecas", "Moratalaz",
+            "Ciudad Lineal", "Hortaleza", "Villaverde", "Villa de Vallecas",
+            "Vicálvaro", "San Blas-Canillejas", "Barajas"
+        ]
 
     def generate_risk_map(self, velocidad, lluvia, viento, temperatura, humedad):
-        """
-        Calcula un riesgo simulado por distrito usando los parámetros.
-        Retorna el GeoDataFrame con la columna 'riesgo' actualizada.
-        """
-        # Función simple de riesgo basado en los parámetros
-        for idx, row in self.gdf.iterrows():
-            riesgo = (
-                velocidad * 0.2 +
-                lluvia * 0.3 +
-                viento * 0.2 +
-                max(0, 25 - temperatura) * 0.1 +
-                humedad * 0.2
-            )
-            riesgo += np.random.normal(0, 5)  # Aleatoriedad
-            self.gdf.at[idx, 'riesgo'] = np.clip(riesgo, 0, 100)
+        # Crear cuadrícula 10x10
+        x, y = np.meshgrid(range(10), range(10))
+        # Riesgo simulado por combinación de factores
+        z = np.random.rand(10, 10) * 50 + (velocidad + lluvia + viento) / 5
+        z = np.clip(z, 0, 100)
+        color = z
 
-        return self.gdf
+        # Generar DataFrame de distritos para el monitor de alertas
+        distritos = pd.DataFrame({
+            "name": self.distritos,
+            "riesgo": np.random.rand(len(self.distritos)) * 100
+        })
+
+        return distritos, x, y, z, color
