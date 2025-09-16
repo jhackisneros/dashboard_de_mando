@@ -1,32 +1,30 @@
+# functions/precog.py
 import geopandas as gpd
 import numpy as np
 
 class PreCogLogic:
     def __init__(self):
-        # Cargar directamente los distritos de Madrid desde GeoJSON online
+        # Cargar los distritos de Madrid desde GeoJSON
         url = "https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/madrid-districts.geojson"
         self.gdf = gpd.read_file(url)
+        # Inicializar una columna de riesgo
+        self.gdf['riesgo'] = 0.0
 
     def generate_risk_map(self, velocidad, lluvia, viento, temperatura, humedad):
         """
-        Calcula un nivel de riesgo para cada distrito de Madrid
-        usando una fórmula de ejemplo.
-        Devuelve un GeoDataFrame con una columna 'riesgo' añadida.
+        Calcula un riesgo simulado por distrito usando los parámetros.
+        Retorna el GeoDataFrame con la columna 'riesgo' actualizada.
         """
-        df = self.gdf.copy()
+        # Función simple de riesgo basado en los parámetros
+        for idx, row in self.gdf.iterrows():
+            riesgo = (
+                velocidad * 0.2 +
+                lluvia * 0.3 +
+                viento * 0.2 +
+                max(0, 25 - temperatura) * 0.1 +
+                humedad * 0.2
+            )
+            riesgo += np.random.normal(0, 5)  # Aleatoriedad
+            self.gdf.at[idx, 'riesgo'] = np.clip(riesgo, 0, 100)
 
-        # Fórmula de ejemplo de riesgo (puedes mejorarla según datos reales)
-        riesgo = (
-            0.4 * velocidad/200 * 100 +
-            0.3 * lluvia/100 * 100 +
-            0.1 * viento/100 * 100 +
-            0.1 * (40-temperatura)/40 * 100 +  # temperatura baja aumenta riesgo
-            0.1 * humedad/100 * 100
-        )
-
-        # Añadimos ruido aleatorio para simular variabilidad por distrito
-        riesgo += np.random.randn(len(df)) * 5
-        riesgo = np.clip(riesgo, 0, 100)  # limitar entre 0-100%
-        df["riesgo"] = riesgo
-
-        return df
+        return self.gdf
