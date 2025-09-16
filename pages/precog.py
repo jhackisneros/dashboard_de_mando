@@ -1,5 +1,5 @@
 import streamlit as st
-import plotly.graph_objects as go
+import plotly.express as px
 from functions.precog import PreCogLogic
 
 class PrecogPage:
@@ -7,38 +7,39 @@ class PrecogPage:
         self.logic = PreCogLogic()
 
     def show(self):
-        st.header("Precog: Monitor de Riesgo Táctico 3D - Madrid")
+        st.header("Precog: Monitor de Riesgo Táctico 3D por Distritos de Madrid")
 
-        # Sliders interactivos
+        # Sliders para parámetros
         velocidad = st.slider("Velocidad media (km/h)", 0, 200, 50)
         lluvia = st.slider("Intensidad de lluvia (mm/h)", 0, 100, 20)
         viento = st.slider("Velocidad del viento (km/h)", 0, 100, 10)
         temperatura = st.slider("Temperatura (°C)", -10, 40, 20)
         humedad = st.slider("Humedad (%)", 0, 100, 50)
 
-        # Generar mapa de riesgo
-        distritos, z, color = self.logic.generate_risk_map(velocidad, lluvia, viento, temperatura, humedad)
+        # Generamos el GeoDataFrame con riesgo
+        gdf = self.logic.generate_risk_map(velocidad, lluvia, viento, temperatura, humedad)
 
-        # Gráfico 3D de barras (cada distrito)
-        fig = go.Figure(data=[go.Bar(
-            x=distritos,
-            y=z,
-            marker_color=color
-        )])
-        fig.update_layout(
-            title="Nivel de riesgo por distrito",
-            xaxis_title="Distrito",
-            yaxis_title="Nivel de riesgo (%)",
-            yaxis=dict(range=[0, 100])
+        # Mapa interactivo con Plotly
+        fig = px.choropleth_mapbox(
+            gdf,
+            geojson=gdf.geometry,
+            locations=gdf.index,
+            color="riesgo",
+            color_continuous_scale="RdYlGn_r",
+            mapbox_style="carto-positron",
+            center={"lat": 40.4168, "lon": -3.7038},
+            zoom=10,
+            opacity=0.6,
+            hover_data={"name": True, "riesgo": True}
         )
         st.plotly_chart(fig, use_container_width=True)
 
         # Monitor de alertas
-        rojos = sum(c == "red" for c in color)
-        amarillos = sum(c == "yellow" for c in color)
-        verdes = sum(c == "green" for c in color)
+        rojos = (gdf["riesgo"] > 70).sum()
+        amarillos = ((gdf["riesgo"] > 40) & (gdf["riesgo"] <= 70)).sum()
+        verdes = (gdf["riesgo"] <= 40).sum()
+        st.info(f"⚠️ Alertas: {rojos} distritos en rojo, {amarillos} en amarillo, {verdes} en verde")
 
-        st.subheader("Monitor de Alertas")
-        st.markdown(f"- 🔴 Alto riesgo: {rojos} distritos")
-        st.markdown(f"- 🟡 Riesgo medio: {amarillos} distritos")
-        st.markdown(f"- 🟢 Bajo riesgo: {verdes} distritos")
+        # Tabla resumen
+        st.subheader("Riesgo por distrito")
+        st.dataframe(gdf[["name", "riesgo"]].sort_values(by="riesgo", ascending=False))

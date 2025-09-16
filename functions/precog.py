@@ -1,38 +1,32 @@
-import numpy as np
 import geopandas as gpd
+import numpy as np
 
 class PreCogLogic:
-    def __init__(self, geojson_path="data/distritos_madrid.geojson"):
-        # Cargar distritos de Madrid
-        self.gdf = gpd.read_file(geojson_path)
-    
+    def __init__(self):
+        # Cargar directamente los distritos de Madrid desde GeoJSON online
+        url = "https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/madrid-districts.geojson"
+        self.gdf = gpd.read_file(url)
+
     def generate_risk_map(self, velocidad, lluvia, viento, temperatura, humedad):
         """
-        Genera un "mapa de riesgo" simplificado por distrito.
+        Calcula un nivel de riesgo para cada distrito de Madrid
+        usando una fórmula de ejemplo.
+        Devuelve un GeoDataFrame con una columna 'riesgo' añadida.
         """
-        distritos = self.gdf["name"].values
-        num_distritos = len(distritos)
+        df = self.gdf.copy()
 
-        # Simulación de riesgo por distrito
-        z = np.random.rand(num_distritos) * 50
-        z += (velocidad + lluvia + viento)/5
-        z = np.clip(z, 0, 100)
+        # Fórmula de ejemplo de riesgo (puedes mejorarla según datos reales)
+        riesgo = (
+            0.4 * velocidad/200 * 100 +
+            0.3 * lluvia/100 * 100 +
+            0.1 * viento/100 * 100 +
+            0.1 * (40-temperatura)/40 * 100 +  # temperatura baja aumenta riesgo
+            0.1 * humedad/100 * 100
+        )
 
-        # Determinar color según nivel de riesgo
-        color = []
-        for val in z:
-            if val > 66:
-                color.append("rojo")
-            elif val > 33:
-                color.append("amarillo")
-            else:
-                color.append("verde")
+        # Añadimos ruido aleatorio para simular variabilidad por distrito
+        riesgo += np.random.randn(len(df)) * 5
+        riesgo = np.clip(riesgo, 0, 100)  # limitar entre 0-100%
+        df["riesgo"] = riesgo
 
-        # Contar niveles de riesgo
-        resumen = {
-            "rojo": color.count("rojo"),
-            "amarillo": color.count("amarillo"),
-            "verde": color.count("verde")
-        }
-
-        return distritos, z, color, resumen
+        return df
