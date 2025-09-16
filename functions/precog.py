@@ -1,29 +1,32 @@
+import geopandas as gpd
 import numpy as np
-import pandas as pd
 
 class PreCogLogic:
     def __init__(self):
-        # Definir los distritos simulados como un ejemplo
-        self.distritos = [
-            "Centro", "Arganzuela", "Retiro", "Salamanca", "Chamartín",
-            "Tetuán", "Chamberí", "Fuencarral-El Pardo", "Moncloa-Aravaca",
-            "Latina", "Carabanchel", "Usera", "Puente de Vallecas", "Moratalaz",
-            "Ciudad Lineal", "Hortaleza", "Villaverde", "Villa de Vallecas",
-            "Vicálvaro", "San Blas-Canillejas", "Barajas"
-        ]
+        # Cargar directamente los distritos de Madrid desde GeoJSON online
+        url = "https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/madrid-districts.geojson"
+        self.gdf = gpd.read_file(url)
 
     def generate_risk_map(self, velocidad, lluvia, viento, temperatura, humedad):
-        # Crear cuadrícula 10x10
-        x, y = np.meshgrid(range(10), range(10))
-        # Riesgo simulado por combinación de factores
-        z = np.random.rand(10, 10) * 50 + (velocidad + lluvia + viento) / 5
-        z = np.clip(z, 0, 100)
-        color = z
+        """
+        Calcula un nivel de riesgo para cada distrito de Madrid
+        usando una fórmula de ejemplo.
+        Devuelve un GeoDataFrame con una columna 'riesgo' añadida.
+        """
+        df = self.gdf.copy()
 
-        # Generar DataFrame de distritos para el monitor de alertas
-        distritos = pd.DataFrame({
-            "name": self.distritos,
-            "riesgo": np.random.rand(len(self.distritos)) * 100
-        })
+        # Fórmula de ejemplo de riesgo (puedes mejorarla según datos reales)
+        riesgo = (
+            0.4 * velocidad/200 * 100 +
+            0.3 * lluvia/100 * 100 +
+            0.1 * viento/100 * 100 +
+            0.1 * (40-temperatura)/40 * 100 +  # temperatura baja aumenta riesgo
+            0.1 * humedad/100 * 100
+        )
 
-        return distritos, x, y, z, color
+        # Añadimos ruido aleatorio para simular variabilidad por distrito
+        riesgo += np.random.randn(len(df)) * 5
+        riesgo = np.clip(riesgo, 0, 100)  # limitar entre 0-100%
+        df["riesgo"] = riesgo
+
+        return df
