@@ -9,7 +9,7 @@ st.set_page_config(page_title="ChronoLogistics Dashboard", layout="wide")
 st.sidebar.title("Navegación del Dashboard")
 page_option = st.sidebar.selectbox(
     "Selecciona la pestaña:",
-    ["Precog", "Chronos", "K-Lang", "ChatBot"]
+    ["Precog", "Chronos", "K-Lang", "ChatBot FAQ"]
 )
 
 # Instanciamos las páginas
@@ -25,5 +25,5 @@ elif page_option == "Chronos":
     chronos_page.show()
 elif page_option == "K-Lang":
     klang_page.show()
-elif page_option == "ChatBot":
+elif page_option == "ChatBot FAQ":
     chatbot_page.show()
