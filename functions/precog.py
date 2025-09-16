@@ -1,29 +1,34 @@
-import geopandas as gpd
 import numpy as np
+import geopandas as gpd
 
 class PreCogLogic:
     def __init__(self, geojson_path="data/distritos_madrid.geojson"):
-        try:
-            self.gdf = gpd.read_file(geojson_path)
-        except Exception as e:
-            raise RuntimeError(f"No se pudo cargar el archivo GeoJSON: {e}")
+        # Cargar los distritos de Madrid
+        self.gdf = gpd.read_file(geojson_path)
+    
+    def generate_risk_map(self, velocidad, lluvia, viento, temperatura, humedad):
+        """
+        Genera un mapa de riesgo simulado para cada distrito.
+        Retorna:
+        - nombres de distritos
+        - valores de riesgo (0-100)
+        - colores asociados
+        """
+        distritos = self.gdf["name"].tolist()
+        num_distritos = len(distritos)
 
-    def calcular_riesgo_distritos(self, velocidad, lluvia, viento, temperatura, humedad):
-        distritos = []
-        riesgos = []
+        # Generar valores de riesgo aleatorios basados en los parámetros
+        z = np.random.rand(num_distritos) * 50 + (velocidad + lluvia + viento + temperatura + humedad) / 5
+        z = np.clip(z, 0, 100)
 
-        for _, row in self.gdf.iterrows():
-            base_riesgo = (
-                (velocidad * 0.3) +
-                (lluvia * 0.25) +
-                (viento * 0.2) +
-                (temperatura * 0.15) +
-                (humedad * 0.1)
-            )
-            ruido = np.random.uniform(-10, 10)
-            riesgo = max(0, min(100, base_riesgo + ruido))
+        # Asignar colores según nivel de riesgo
+        color = []
+        for val in z:
+            if val > 70:
+                color.append("red")
+            elif val > 40:
+                color.append("yellow")
+            else:
+                color.append("green")
 
-            distritos.append(row["NOMBRE"])  # El campo se llama así en el GeoJSON
-            riesgos.append(riesgo)
-
-        return distritos, riesgos, self.gdf
+        return distritos, z, color
