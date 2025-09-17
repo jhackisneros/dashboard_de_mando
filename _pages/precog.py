@@ -36,15 +36,11 @@ class PrecogPage:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # --- Monitor de alertas robusto ---
-        if "riesgo" in gdf.columns:
-            riesgo = pd.to_numeric(gdf["riesgo"], errors='coerce').fillna(0)
-            rojos = (riesgo > 70).sum()
-            amarillos = ((riesgo > 40) & (riesgo <= 70)).sum()
-            verdes = (riesgo <= 40).sum()
-            st.info(f"⚠️ Alertas: 🔴 {rojos}  🟡 {amarillos}  🟢 {verdes}")
-        else:
-            st.warning("❌ La columna 'riesgo' no existe. Revisa la función generate_risk_map()")
+        # --- Monitor de alertas ---
+        rojos = int((gdf["riesgo"] > 70).sum())
+        amarillos = int(((gdf["riesgo"] > 40) & (gdf["riesgo"] <= 70)).sum())
+        verdes = int((gdf["riesgo"] <= 40).sum())
+        st.info(f"⚠️ Alertas: 🔴 {rojos} | 🟡 {amarillos} | 🟢 {verdes}")
 
         # --- Pronóstico de los próximos 7 días ---
         st.subheader("Pronóstico de riesgo para los próximos 7 días")
@@ -56,7 +52,7 @@ class PrecogPage:
                 **{day: np.clip(np.random.normal(row['riesgo'], 10), 0, 100) for day in days}
             })
         df_forecast = pd.DataFrame(forecast_data)
-        st.dataframe(df_forecast.sort_values(by=days[-1], ascending=False))  # ordenar por último día
+        st.dataframe(df_forecast.sort_values(by=days[-1], ascending=False))
 
         # --- Tabla resumen ---
         st.subheader("Riesgo por distrito (actual)")

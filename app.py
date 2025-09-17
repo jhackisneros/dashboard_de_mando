@@ -1,8 +1,8 @@
+import streamlit as st
 from _pages.precog import PrecogPage
 from _pages.chronos import ChronosPage
 from _pages.klang import KLangPage
 from _pages.chatbot import ChatBotPage
-import streamlit as st
 
 st.set_page_config(page_title="ChronoLogistics Dashboard", layout="wide")
 
