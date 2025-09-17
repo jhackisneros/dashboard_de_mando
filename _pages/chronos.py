@@ -1,3 +1,4 @@
+import streamlit as st
 from functions.ChronosLogic import ChronosLogic
 
 class ChronosPage:
