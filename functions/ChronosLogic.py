@@ -61,10 +61,29 @@ class ChronosLogic:
         fig.update_layout(
             showlegend=False,
             title=f"Visión: {estrategia}",
-            height=450
+            height=400
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
+        # --- Componente 3: Mapa centrado en Madrid ---
+        df_madrid = pd.DataFrame({
+            "lat": [40.4168],
+            "lon": [-3.7038],
+            "Lugar": ["Madrid"]
+        })
+
+        mapa = px.scatter_mapbox(
+            df_madrid,
+            lat="lat",
+            lon="lon",
+            hover_name="Lugar",
+            zoom=10,
+            height=400,
+            color_discrete_sequence=[info["color"]]
+        )
+        mapa.update_layout(mapbox_style="open-street-map")
+        st.plotly_chart(mapa, use_container_width=True)
 
         # --- Texto de justificación ---
         st.markdown(f"**Justificación:** {info['defensa']}")
