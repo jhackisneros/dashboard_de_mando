@@ -14,7 +14,7 @@ Este proyecto implementa un dashboard integral para la gestión táctica y estra
 
 El proyecto está organizado en capas y módulos, como muestra el siguiente diagrama:
 
-![Arquitectura del Proyecto](docs/arquitectura.png)
+![Arquitectura del Proyecto](assets/diagram_1.png)
 
 - **UI Layer:**  
   - `app.py` (o `run.py`): punto de entrada principal.
