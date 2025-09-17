@@ -37,9 +37,9 @@ class PrecogPage:
         st.plotly_chart(fig, use_container_width=True)
 
         # --- Monitor de alertas ---
-        rojos = int((gdf["riesgo"] > 70).sum())
-        amarillos = int(((gdf["riesgo"] > 40) & (gdf["riesgo"] <= 70)).sum())
-        verdes = int((gdf["riesgo"] <= 40).sum())
+        rojos = int((gdf["riesgo"] > 30).sum())
+        amarillos = int(((gdf["riesgo"] > 20) & (gdf["riesgo"] <= 30)).sum())
+        verdes = int((gdf["riesgo"] <= 20).sum())
         st.info(f"⚠️ Alertas: 🔴 {rojos} | 🟡 {amarillos} | 🟢 {verdes}")
 
         # --- Pronóstico de los próximos 7 días ---
