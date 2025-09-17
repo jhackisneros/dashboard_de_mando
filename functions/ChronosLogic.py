@@ -2,27 +2,38 @@ import streamlit as st
 
 class ChronosLogic:
     def __init__(self):
-        # Estrategias disponibles
+        # Estrategias disponibles con imagen y defensa
         self.estrategias = {
             "Fortaleza Verde": {
                 "imagen": "assets/fortaleza_verde.png",
-                "defensa": "La estrategia verde asegura sostenibilidad y resiliencia a largo plazo."
+                "defensa": (
+                    "Invertir en sostenibilidad y energías renovables para asegurar la "
+                    "resiliencia a largo plazo de ChronoLogistics y proteger Madrid ante futuras crisis climáticas."
+                )
             },
             "Búnker Tecnológico": {
                 "imagen": "assets/bunker_tecnologico.png",
-                "defensa": "El búnker tecnológico protege los activos críticos mediante innovación y seguridad."
+                "defensa": (
+                    "Fortalecer infraestructuras tecnológicas y de seguridad para garantizar "
+                    "operaciones continuas, incluso ante desastres o ataques cibernéticos."
+                )
             }
         }
-        self.estrategia_seleccionada = None
 
     def render(self):
         st.header("Chronos: Visión Estratégica 2040")
-        # Selector de estrategia
-        self.estrategia_seleccionada = st.selectbox(
+
+        # --- Componente 1: Selector de Estrategia ---
+        estrategia = st.selectbox(
             "Selecciona la estrategia:",
             list(self.estrategias.keys())
         )
-        # Mostrar la información correspondiente
-        info = self.estrategias[self.estrategia_seleccionada]
+
+        # --- Componente 2: Visualizador de futuros ---
+        info = self.estrategias[estrategia]
+
+        # Mostrar imagen (pre-generada por GAN y guardada en assets/)
         st.image(info["imagen"], use_column_width=True)
-        st.write(info["defensa"])
+
+        # Mostrar defensa argumentada
+        st.markdown(f"**Justificación:** {info['defensa']}")
